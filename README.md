@@ -28,6 +28,7 @@ python -m jarvis.main "Jarvis screen dekho"
 python -m jarvis.main --mode trading "NIFTY 50 ka trend batao"
 python -m jarvis.main --remember "Kal 10 baje meeting remind karna"
 python -m jarvis.main --speak "Jarvis hello bolo"
+python -m jarvis.main "Jarvis status"
 python -m jarvis.main "Jarvis memory clear karo"
 ```
 
@@ -44,9 +45,14 @@ JARVIS_MEMORY_PATH=.jarvis_memory.json
 JARVIS_VOICE_ENABLED=false
 JARVIS_TTS_ENGINE=espeak
 JARVIS_TTS_VOICE=hi
+JARVIS_REQUIRE_WAKE_WORD=true
 ```
 
 ## Next Steps
 - Add tool integrations (browser, files, APIs).
 - Add conversation memory (local db or vector store).
 - Add skill registry + routing for specialized tasks.
+
+## Behavior notes
+- Assistant default me idle rehta hai jab tak wake word nahi aata.
+- Sensitive actions ke liye confirm/cancel flow enforce hota hai.

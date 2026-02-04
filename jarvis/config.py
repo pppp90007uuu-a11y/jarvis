@@ -24,6 +24,7 @@ class AppConfig:
     voice_enabled: bool
     tts_engine: str
     tts_voice: str
+    require_wake_word: bool
 
 
 def load_config() -> AppConfig:
@@ -41,6 +42,11 @@ def load_config() -> AppConfig:
         "true",
         "yes",
     }
+    require_wake_word = getenv("JARVIS_REQUIRE_WAKE_WORD", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
 
     return AppConfig(
         assistant_name=getenv("JARVIS_NAME", "Jarvis"),
@@ -54,4 +60,5 @@ def load_config() -> AppConfig:
         voice_enabled=voice_enabled,
         tts_engine=getenv("JARVIS_TTS_ENGINE", "espeak"),
         tts_voice=getenv("JARVIS_TTS_VOICE", "hi"),
+        require_wake_word=require_wake_word,
     )

@@ -18,6 +18,49 @@ def generate_response(
 ) -> str:
     lowered = user_message.lower()
 
+    if "cancel" in lowered:
+        runtime.clear_pending_action()
+        return "Theek hai, pending action cancel kar diya hai."
+
+    if runtime.pending_action and "confirm" in lowered:
+        action = runtime.pending_action
+        runtime.clear_pending_action()
+        return (
+            "Confirmation mil gaya. "
+            f"Action '{action}' ko execute karne se pehle main phir se steps share karunga."
+        )
+
+    if runtime.pending_action:
+        return (
+            "Aapka last action critical hai. "
+            "Confirm karne ke liye 'confirm' likhen ya cancel karne ke liye 'cancel' bolein."
+        )
+
+    if config.require_wake_word and runtime.mode == "assistant":
+        if config.wake_word.lower() not in lowered:
+            return (
+                f"{assistant_name}: Main idle hoon. "
+                f"Activate karne ke liye wake word '{config.wake_word}' use karein "
+                "ya hotkey trigger karein."
+            )
+
+    if "jarvis help" in lowered or "help" in lowered:
+        return (
+            "Commands: 'Jarvis screen dekho', 'Jarvis camera on karo', "
+            "'trading mode', 'automation mode', 'focus mode', 'study mode', "
+            "'Jarvis memory clear karo', 'Jarvis status'. "
+            "Voice ke liye CLI me --speak flag use karein."
+        )
+
+    if "jarvis status" in lowered:
+        memory_state = "on" if memory.enabled else "off"
+        voice_state = "on" if config.voice_enabled else "off"
+        return (
+            "Status: "
+            f"mode={runtime.mode}, memory={memory_state}, voice={voice_state}, "
+            f"wake_word='{config.wake_word}', hotkey='{config.hotkey}'."
+        )
+
     if "jarvis memory clear karo" in lowered:
         memory.clear()
         return "Theek hai, maine memory clear kar di hai."
@@ -58,6 +101,13 @@ def generate_response(
     if "screen band karo" in lowered:
         runtime.screen_vision_enabled = False
         return "Screen access band kar diya hai."
+
+    if safety.requires_confirmation(user_message):
+        runtime.queue_action(user_message)
+        return (
+            "Yeh action sensitive hai. "
+            "Confirm karne ke liye 'confirm' likhen ya 'cancel' bolein."
+        )
 
     if runtime.mode == "trading":
         return (

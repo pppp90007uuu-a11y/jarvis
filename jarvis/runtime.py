@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -13,9 +14,16 @@ class RuntimeState:
     mode: str
     screen_vision_enabled: bool = False
     camera_vision_enabled: bool = False
+    pending_action: Optional[str] = None
 
     def update_mode(self, mode: str) -> None:
         self.mode = mode
+
+    def queue_action(self, action: str) -> None:
+        self.pending_action = action
+
+    def clear_pending_action(self) -> None:
+        self.pending_action = None
 
 
 def run_automation_task(command: str) -> str:
