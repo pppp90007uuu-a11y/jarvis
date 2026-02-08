@@ -51,6 +51,7 @@ JARVIS_VOICE_ENABLED=false
 JARVIS_TTS_ENGINE=espeak
 JARVIS_TTS_VOICE=hi
 JARVIS_REQUIRE_WAKE_WORD=true
+JARVIS_LOW_RESOURCE_MODE=false
 ```
 
 ## Next Steps
@@ -64,3 +65,4 @@ JARVIS_REQUIRE_WAKE_WORD=true
 - Trading mode analysis-only hota hai; trade execute nahi kiya jaata.
 - Camera/screen/voice access explicit consent ke bina start nahi hota.
 - Iron Man mode me concise status + mission-style planning focus hota hai.
+- Low-resource mode me logging minimal hoti hai, taa ki low-spec PCs par smooth rahe.

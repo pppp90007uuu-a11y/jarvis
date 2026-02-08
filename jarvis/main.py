@@ -61,7 +61,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def run_cli(args: argparse.Namespace) -> int:
     config = load_config()
-    configure_logging(config.log_level)
+    effective_log_level = "WARNING" if config.low_resource_mode else config.log_level
+    configure_logging(effective_log_level)
 
     logger = logging.getLogger("jarvis")
     assistant_name = args.name or config.assistant_name
@@ -75,7 +76,8 @@ def run_cli(args: argparse.Namespace) -> int:
     )
 
     if args.version:
-        print(f"{assistant_name} (env={config.environment})")
+        low_resource_note = " low-resource" if config.low_resource_mode else ""
+        print(f"{assistant_name} (env={config.environment}{low_resource_note})")
         return 0
 
     if args.message:
