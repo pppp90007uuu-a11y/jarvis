@@ -15,6 +15,8 @@ class RuntimeState:
     screen_vision_enabled: bool = False
     camera_vision_enabled: bool = False
     pending_action: Optional[str] = None
+    trading_symbol: Optional[str] = None
+    trading_timeframe: Optional[str] = None
 
     def update_mode(self, mode: str) -> None:
         self.mode = mode
@@ -24,6 +26,12 @@ class RuntimeState:
 
     def clear_pending_action(self) -> None:
         self.pending_action = None
+
+    def update_trading_context(self, symbol: Optional[str], timeframe: Optional[str]) -> None:
+        if symbol:
+            self.trading_symbol = symbol
+        if timeframe:
+            self.trading_timeframe = timeframe
 
 
 def run_automation_task(command: str) -> str:

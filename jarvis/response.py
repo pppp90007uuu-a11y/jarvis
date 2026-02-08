@@ -6,6 +6,7 @@ from jarvis.config import AppConfig
 from jarvis.memory import MemoryStore
 from jarvis.runtime import RuntimeState, run_automation_task, run_utility_action
 from jarvis.safety import SafetyChecker
+from jarvis.trading import build_trading_plan, format_trading_brief
 
 
 def generate_response(
@@ -72,6 +73,18 @@ def generate_response(
             "Final decision aapka hoga."
         )
 
+    if "set symbol" in lowered or "symbol" in lowered:
+        parts = user_message.split()
+        symbol = parts[-1] if parts else None
+        runtime.update_trading_context(symbol=symbol, timeframe=None)
+        return f"Trading symbol set kiya: {runtime.trading_symbol}."
+
+    if "set timeframe" in lowered or "timeframe" in lowered:
+        parts = user_message.split()
+        timeframe = parts[-1] if parts else None
+        runtime.update_trading_context(symbol=None, timeframe=timeframe)
+        return f"Trading timeframe set kiya: {runtime.trading_timeframe}."
+
     if "automation mode" in lowered:
         runtime.update_mode("automation")
         return "Automation mode active. Kaun sa task karna hai?"
@@ -110,10 +123,8 @@ def generate_response(
         )
 
     if runtime.mode == "trading":
-        return (
-            "Trading mode ready. Symbol, timeframe, ya indicator batao. "
-            "Main sirf analysis aur reminders dunga."
-        )
+        plan = build_trading_plan(runtime.trading_symbol, runtime.trading_timeframe)
+        return format_trading_brief(plan)
 
     if runtime.mode == "automation":
         return run_automation_task(user_message)

@@ -27,6 +27,8 @@ python -m jarvis.main --help
 ```bash
 python -m jarvis.main "Jarvis screen dekho"
 python -m jarvis.main --mode trading "NIFTY 50 ka trend batao"
+python -m jarvis.main --mode trading "Set symbol NIFTY50"
+python -m jarvis.main --mode trading "Set timeframe 15m"
 python -m jarvis.main --remember "Kal 10 baje meeting remind karna"
 python -m jarvis.main --speak "Jarvis hello bolo"
 python -m jarvis.main "Jarvis status"
@@ -57,3 +59,4 @@ JARVIS_REQUIRE_WAKE_WORD=true
 ## Behavior notes
 - Assistant default me idle rehta hai jab tak wake word nahi aata.
 - Sensitive actions ke liye confirm/cancel flow enforce hota hai.
+- Trading mode analysis-only hota hai; trade execute nahi kiya jaata.
