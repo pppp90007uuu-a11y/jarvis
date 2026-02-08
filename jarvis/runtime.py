@@ -17,6 +17,7 @@ class RuntimeState:
     pending_action: Optional[str] = None
     trading_symbol: Optional[str] = None
     trading_timeframe: Optional[str] = None
+    voice_listen_enabled: bool = False
 
     def update_mode(self, mode: str) -> None:
         self.mode = mode
@@ -32,6 +33,9 @@ class RuntimeState:
             self.trading_symbol = symbol
         if timeframe:
             self.trading_timeframe = timeframe
+
+    def set_voice_listen(self, enabled: bool) -> None:
+        self.voice_listen_enabled = enabled
 
 
 def run_automation_task(command: str) -> str:

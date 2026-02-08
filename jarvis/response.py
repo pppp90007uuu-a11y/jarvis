@@ -7,6 +7,7 @@ from jarvis.memory import MemoryStore
 from jarvis.runtime import RuntimeState, run_automation_task, run_utility_action
 from jarvis.safety import SafetyChecker
 from jarvis.trading import build_trading_plan, format_trading_brief
+from jarvis.voice_input import build_voice_setup_instructions, check_voice_dependencies
 
 
 def generate_response(
@@ -56,15 +57,26 @@ def generate_response(
     if "jarvis status" in lowered:
         memory_state = "on" if memory.enabled else "off"
         voice_state = "on" if config.voice_enabled else "off"
+        listen_state = "on" if runtime.voice_listen_enabled else "off"
         return (
             "Status: "
             f"mode={runtime.mode}, memory={memory_state}, voice={voice_state}, "
-            f"wake_word='{config.wake_word}', hotkey='{config.hotkey}'."
+            f"wake_word='{config.wake_word}', hotkey='{config.hotkey}', "
+            f"voice_listen={listen_state}."
         )
 
     if "jarvis memory clear karo" in lowered:
         memory.clear()
         return "Theek hai, maine memory clear kar di hai."
+
+    if "jarvis listen on" in lowered:
+        status = check_voice_dependencies()
+        runtime.set_voice_listen(status.ok)
+        return build_voice_setup_instructions(status)
+
+    if "jarvis listen off" in lowered:
+        runtime.set_voice_listen(False)
+        return "Voice listening band kar diya hai."
 
     if "trading mode" in lowered:
         runtime.update_mode("trading")
@@ -114,6 +126,13 @@ def generate_response(
     if "screen band karo" in lowered:
         runtime.screen_vision_enabled = False
         return "Screen access band kar diya hai."
+
+    if "voice control" in lowered or "bol ke control" in lowered:
+        status = check_voice_dependencies()
+        return (
+            "Voice control opt-in hai aur hamesha-on mode allowed nahi hai. "
+            f"{build_voice_setup_instructions(status)}"
+        )
 
     if safety.requires_confirmation(user_message):
         runtime.queue_action(user_message)
