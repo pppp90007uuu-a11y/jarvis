@@ -42,6 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
             "automation",
             "focus",
             "study",
+            "ironman",
         ],
         help="Force a specific interaction mode.",
     )

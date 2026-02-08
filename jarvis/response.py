@@ -85,6 +85,13 @@ def generate_response(
             "Final decision aapka hoga."
         )
 
+    if "iron man mode" in lowered or "ironman mode" in lowered:
+        runtime.update_mode("ironman")
+        return (
+            "Iron Man mode active. Main crisp status updates, smart summaries, "
+            "aur mission-style task breakdown dunga. Safety aur consent rules follow honge."
+        )
+
     if "set symbol" in lowered or "symbol" in lowered:
         parts = user_message.split()
         symbol = parts[-1] if parts else None
@@ -152,6 +159,12 @@ def generate_response(
         return (
             f"{runtime.mode.title()} mode active. "
             "Goals aur timers set karne ke liye batayein."
+        )
+
+    if runtime.mode == "ironman":
+        return (
+            "Iron Man mode ready. Mission do: task list, priority, aur desired outcome. "
+            "Main step-by-step execution plan banaunga."
         )
 
     if "remind" in lowered or "yaad dilao" in lowered:
