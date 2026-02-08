@@ -48,7 +48,7 @@ def generate_response(
 
     if "jarvis help" in lowered or "help" in lowered:
         return (
-            "Commands: 'Jarvis screen dekho', 'Jarvis camera on karo', "
+            "Commands: 'Jarvis screen dekho', "
             "'trading mode', 'automation mode', 'focus mode', 'study mode', "
             "'Jarvis memory clear karo', 'Jarvis status'. "
             "Voice ke liye CLI me --speak flag use karein."
@@ -120,15 +120,6 @@ def generate_response(
         allowed, message = safety.check_screen_permission(user_message)
         runtime.screen_vision_enabled = allowed
         return message
-
-    if "jarvis camera on karo" in lowered:
-        allowed, message = safety.check_camera_permission(user_message)
-        runtime.camera_vision_enabled = allowed
-        return message
-
-    if "jarvis camera band karo" in lowered:
-        runtime.camera_vision_enabled = False
-        return "Camera access band kar diya hai."
 
     if "screen band karo" in lowered:
         runtime.screen_vision_enabled = False

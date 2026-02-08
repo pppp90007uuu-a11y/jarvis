@@ -11,7 +11,7 @@ skills, aur integrations add karna easy ho.
 - **Logging setup** for production-friendly diagnostics.
 - **Config loading** via environment variables and `.env` support.
 - **Memory store** for reminders and user-approved notes.
-- **Safety checks** for camera/screen permissions and destructive actions.
+- **Safety checks** for screen permissions and destructive actions.
 - **Hindi voice output** via system TTS (espeak/say) with explicit opt-in.
 
 ## Quick Start
@@ -63,6 +63,6 @@ JARVIS_LOW_RESOURCE_MODE=false
 - Assistant default me idle rehta hai jab tak wake word nahi aata.
 - Sensitive actions ke liye confirm/cancel flow enforce hota hai.
 - Trading mode analysis-only hota hai; trade execute nahi kiya jaata.
-- Camera/screen/voice access explicit consent ke bina start nahi hota.
+- Screen/voice access explicit consent ke bina start nahi hota.
 - Iron Man mode me concise status + mission-style planning focus hota hai.
 - Low-resource mode me logging minimal hoti hai, taa ki low-spec PCs par smooth rahe.

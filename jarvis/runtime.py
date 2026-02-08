@@ -13,7 +13,6 @@ class RuntimeState:
     locale: str
     mode: str
     screen_vision_enabled: bool = False
-    camera_vision_enabled: bool = False
     pending_action: Optional[str] = None
     trading_symbol: Optional[str] = None
     trading_timeframe: Optional[str] = None
