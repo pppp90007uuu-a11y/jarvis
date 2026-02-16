@@ -1,0 +1,42 @@
+account:
+  starting_balance: 100000
+  max_daily_drawdown_pct: 5.0
+  max_overall_drawdown_pct: 10.0
+  max_lot_size: 2.0
+  max_open_positions: 1
+  max_total_exposure_lots: 2.0
+  min_trading_days: 5
+  consistency_profit_cap_pct: 45.0
+
+trading:
+  allowed_symbols: ["EURUSD", "XAUUSD"]
+  one_trade_at_a_time: true
+  risk_per_trade_pct: 0.5
+  rr_ratio: 1.5
+  max_spread_points: 25
+  max_slippage_points: 15
+
+sessions:
+  timezone: "UTC"
+  allowed_windows:
+    - { start: "06:00", end: "18:00" }
+
+news_filter:
+  enabled: true
+  high_impact_only: true
+  block_before_minutes: 30
+  block_after_minutes: 30
+
+weekend:
+  hold_positions: false
+
+strategy:
+  ema_fast: 50
+  ema_slow: 200
+  atr_period: 14
+  pullback_lookback: 5
+
+alerts:
+  telegram_enabled: true
+  telegram_bot_token: "REPLACE_ME"
+  telegram_chat_id: "REPLACE_ME"

@@ -1,0 +1,4 @@
+# No mandatory external dependencies for the starter dry-run.
+# Optional:
+# MetaTrader5
+# pandas
