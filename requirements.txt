@@ -1,0 +1,7 @@
+flask
+flask-cors
+moviepy
+edge-tts
+requests
+googlesearch-python
+Pillow

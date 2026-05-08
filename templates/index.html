@@ -1,133 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tech News Agent Dashboard</title>
+    <title>AI Agent - YouTube Automation</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .loading {
-            display: none;
-        }
-        .loading.active {
-            display: flex;
-        }
-    </style>
-</head>
-<body class="bg-gray-900 text-white min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <header class="mb-12 text-center">
-            <h1 class="text-4xl font-bold text-blue-500 mb-2">AI Tech News Agent</h1>
-            <p class="text-gray-400">Automated YouTube Video Generator</p>
-        </header>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Left Side: Trends -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-semibold">Trending Topics</h2>
-                    <button id="refresh-btn" class="bg-blue-600 hover:bg-blue-700 text-sm px-4 py-2 rounded-lg transition">Refresh</button>
-                </div>
-                <ul id="trends-list" class="space-y-4">
-                    <!-- Trends will be loaded here -->
-                    <div class="animate-pulse flex space-x-4">
-                        <div class="flex-1 space-y-4 py-1">
-                            <div class="h-4 bg-gray-700 rounded w-3/4"></div>
-                            <div class="h-4 bg-gray-700 rounded"></div>
-                        </div>
-                    </div>
-                </ul>
-            </div>
-
-            <!-- Right Side: Preview -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
-                <h2 class="text-2xl font-semibold mb-6">Video Preview</h2>
-                <div id="video-container" class="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center relative">
-                    <p id="placeholder-text" class="text-gray-500">Select a topic to generate video</p>
-                    <video id="output-video" class="hidden w-full h-full" controls></video>
-
-                    <!-- Loading Spinner -->
-                    <div id="loader" class="loading absolute inset-0 bg-black bg-opacity-70 flex-col items-center justify-center z-10">
-                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-                        <p class="text-blue-400 font-medium">Generating Video... This may take a minute.</p>
-                    </div>
-                </div>
-                <div id="script-box" class="mt-6 p-4 bg-gray-700 rounded-lg hidden">
-                    <h3 class="text-sm font-bold text-gray-400 uppercase mb-2">Generated Script:</h3>
-                    <p id="script-text" class="text-gray-200 text-sm leading-relaxed"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-        const trendsList = document.getElementById('trends-list');
-        const refreshBtn = document.getElementById('refresh-btn');
-        const loader = document.getElementById('loader');
-        const outputVideo = document.getElementById('output-video');
-        const placeholderText = document.getElementById('placeholder-text');
-        const scriptBox = document.getElementById('script-box');
-        const scriptText = document.getElementById('script-text');
-
-        async function fetchTrends() {
-            trendsList.innerHTML = '<p class="text-gray-500">Fetching latest trends...</p>';
-            try {
-                const response = await fetch('/api/trends');
-                const data = await response.json();
-                displayTrends(data);
-            } catch (error) {
-                trendsList.innerHTML = '<p class="text-red-500">Failed to load trends.</p>';
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0f172a',
+                        accent: '#3b82f6',
+                    }
+                }
             }
         }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen font-sans">
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        <!-- Sidebar: Navigation & Settings -->
+        <aside class="w-full lg:w-72 bg-slate-900 border-r border-slate-800 p-6 flex flex-col">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="bg-accent p-2 rounded-lg">
+                    <i class="fas fa-robot text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">AI VIDEO AGENT</h1>
+            </div>
 
-        function displayTrends(trends) {
-            trendsList.innerHTML = '';
-            trends.forEach(topic => {
-                const li = document.createElement('li');
-                li.className = 'p-4 bg-gray-700 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-700 transition border border-transparent hover:border-gray-500';
-                li.innerHTML = `
-                    <span class="text-gray-200 font-medium flex-1">${topic}</span>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="generateVideo('${topic}', 'hi')" class="bg-green-600 hover:bg-green-700 text-xs px-3 py-2 rounded font-bold transition flex-1">Hindi</button>
-                        <button onclick="generateVideo('${topic}', 'en')" class="bg-indigo-600 hover:bg-indigo-700 text-xs px-3 py-2 rounded font-bold transition flex-1">English</button>
+            <nav class="space-y-1 flex-1">
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 px-2">Settings</div>
+                <div class="space-y-4 px-2">
+                    <div>
+                        <label class="block text-sm mb-2 text-slate-400">Niche</label>
+                        <select id="niche-select" class="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+                            <option value="Tech News">Tech News</option>
+                            <option value="Amazing Facts">Amazing Facts</option>
+                            <option value="Motivation">Motivation</option>
+                            <option value="Gaming">Gaming</option>
+                        </select>
                     </div>
+                    <div>
+                        <label class="block text-sm mb-2 text-slate-400">Language</label>
+                        <div class="flex gap-2">
+                            <button onclick="setLang('hi')" id="lang-hi" class="flex-1 py-2 rounded-md bg-accent text-white text-xs font-bold">HINDI</button>
+                            <button onclick="setLang('en')" id="lang-en" class="flex-1 py-2 rounded-md bg-slate-800 text-slate-400 text-xs font-bold">ENGLISH</button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="mt-auto pt-6 border-t border-slate-800 text-center">
+                <p class="text-xs text-slate-500">v2.0 Automation Engine</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-10 overflow-y-auto">
+            <div class="max-w-6xl mx-auto">
+                <header class="flex justify-between items-end mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-1">Discover Trends</h2>
+                        <p class="text-slate-400">Select topics to generate your next viral videos.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="refresh-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition text-sm">
+                            <i class="fas fa-sync-alt mr-2"></i>Refresh
+                        </button>
+                        <button id="generate-selected-btn" class="px-6 py-2 bg-accent hover:bg-blue-600 rounded-lg transition text-sm font-bold shadow-lg shadow-blue-900/20">
+                            Generate Selected
+                        </button>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    <!-- Trends Section -->
+                    <div class="xl:col-span-2 space-y-4" id="trends-container">
+                        <!-- Shimmer Loading -->
+                        <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 animate-pulse"></div>
+                        <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 animate-pulse"></div>
+                    </div>
+
+                    <!-- Queue & Preview Section -->
+                    <div class="space-y-8">
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                            <h3 class="text-lg font-bold mb-4 flex items-center">
+                                <i class="fas fa-tasks mr-2 text-accent"></i>Active Queue
+                            </h3>
+                            <div id="queue-container" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                <p class="text-slate-500 text-sm italic">No active tasks...</p>
+                            </div>
+                        </div>
+
+                        <div id="preview-panel" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                            <h3 class="text-lg font-bold mb-4 flex items-center">
+                                <i class="fas fa-play-circle mr-2 text-accent"></i>Video Preview
+                            </h3>
+                            <video id="preview-video" controls class="w-full rounded-lg bg-black aspect-video mb-4"></video>
+                            <div class="bg-slate-800 p-4 rounded-lg">
+                                <p id="preview-script" class="text-xs text-slate-400 leading-relaxed italic"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+
+    <script>
+        let currentLang = 'hi';
+        const trendsContainer = document.getElementById('trends-container');
+        const queueContainer = document.getElementById('queue-container');
+        const previewPanel = document.getElementById('preview-panel');
+        const previewVideo = document.getElementById('preview-video');
+        const previewScript = document.getElementById('preview-script');
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('lang-hi').className = lang === 'hi' ? 'flex-1 py-2 rounded-md bg-accent text-white text-xs font-bold' : 'flex-1 py-2 rounded-md bg-slate-800 text-slate-400 text-xs font-bold';
+            document.getElementById('lang-en').className = lang === 'en' ? 'flex-1 py-2 rounded-md bg-accent text-white text-xs font-bold' : 'flex-1 py-2 rounded-md bg-slate-800 text-slate-400 text-xs font-bold';
+        }
+
+        async function fetchTrends() {
+            trendsContainer.innerHTML = Array(3).fill(0).map(() => `<div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 animate-pulse h-24"></div>`).join('');
+            const response = await fetch('/api/trends');
+            const data = await response.json();
+
+            trendsContainer.innerHTML = '';
+            data.forEach((topic, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 p-5 rounded-2xl border border-slate-800 flex items-center gap-4 hover:border-slate-600 transition group cursor-pointer";
+                card.onclick = (e) => {
+                    if(e.target.tagName !== 'INPUT') {
+                        const cb = card.querySelector('input');
+                        cb.checked = !cb.checked;
+                    }
+                };
+                card.innerHTML = `
+                    <input type="checkbox" value="${topic}" class="w-5 h-5 rounded border-slate-700 bg-slate-800 text-accent focus:ring-accent">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-slate-200 group-hover:text-white transition">${topic}</h4>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-700 group-hover:text-accent transition"></i>
                 `;
-                trendsList.appendChild(li);
+                trendsContainer.appendChild(card);
             });
         }
 
-        async function generateVideo(headline, lang) {
-            loader.classList.add('active');
-            outputVideo.classList.add('hidden');
-            placeholderText.classList.add('hidden');
-            scriptBox.classList.add('hidden');
+        async function startBatch() {
+            const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            if(selected.length === 0) return alert('Please select at least one topic!');
 
-            try {
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ headline, lang })
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    headlines: selected,
+                    lang: currentLang,
+                    niche: document.getElementById('niche-select').value
+                })
+            });
+            const data = await response.json();
+            if(data.success) {
+                selected.forEach(cb => {
+                   document.querySelectorAll('input[type="checkbox"]').forEach(c => { if(c.value === cb) c.checked = false; });
                 });
-                const data = await response.json();
-
-                if (data.success) {
-                    outputVideo.src = data.video_url;
-                    outputVideo.classList.remove('hidden');
-                    scriptText.innerText = data.script;
-                    scriptBox.classList.remove('hidden');
-                    outputVideo.play();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            } catch (error) {
-                alert('An error occurred while generating the video.');
-            } finally {
-                loader.classList.remove('active');
             }
         }
 
-        refreshBtn.addEventListener('click', fetchTrends);
+        async function updateQueue() {
+            const response = await fetch('/api/status');
+            const jobs = await response.json();
+
+            if(Object.keys(jobs).length === 0) {
+                queueContainer.innerHTML = '<p class="text-slate-500 text-sm italic">No active tasks...</p>';
+                return;
+            }
+
+            queueContainer.innerHTML = '';
+            // Sort by creation time (desc)
+            const sortedJobs = Object.entries(jobs).sort((a,b) => b[1].created_at - a[1].created_at);
+
+            sortedJobs.forEach(([id, job]) => {
+                const isDone = job.status === 'Completed';
+                const isError = job.status.startsWith('Error');
+
+                const jobCard = document.createElement('div');
+                jobCard.className = `p-4 rounded-xl border ${isDone ? 'bg-green-950/20 border-green-900/50' : isError ? 'bg-red-950/20 border-red-900/50' : 'bg-slate-800/50 border-slate-700'}`;
+                jobCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h5 class="text-xs font-bold text-slate-300 truncate w-4/5">${job.headline}</h5>
+                        ${isDone ? '<i class="fas fa-check-circle text-green-500"></i>' : isError ? '<i class="fas fa-exclamation-circle text-red-500"></i>' : '<i class="fas fa-spinner animate-spin text-accent"></i>'}
+                    </div>
+                    <p class="text-[10px] text-slate-500 mb-2 uppercase tracking-tighter">${job.status}</p>
+                    <div class="w-full bg-slate-950 rounded-full h-1.5 mb-3">
+                        <div class="bg-accent h-1.5 rounded-full transition-all duration-500" style="width: ${job.progress}%"></div>
+                    </div>
+                    ${isDone ? `
+                        <div class="flex gap-2">
+                            <button id="preview-btn-${id}" class="flex-1 py-1.5 bg-accent hover:bg-blue-600 text-white text-[10px] font-bold rounded">PREVIEW</button>
+                            <a href="${job.video_url}" download class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold rounded text-center">DOWNLOAD</a>
+                        </div>
+                    ` : ''}
+                `;
+                queueContainer.appendChild(jobCard);
+                if(isDone) {
+                    document.getElementById(`preview-btn-${id}`).onclick = () => previewVideoNow(job.video_url, job.script);
+                }
+            });
+        }
+
+        function previewVideoNow(url, script) {
+            previewPanel.classList.remove('hidden');
+            previewVideo.src = url;
+            previewScript.innerText = script;
+            previewVideo.play();
+        }
+
+        document.getElementById('refresh-btn').onclick = fetchTrends;
+        document.getElementById('generate-selected-btn').onclick = startBatch;
+
+        // Init
         fetchTrends();
+        setInterval(updateQueue, 2000);
     </script>
 </body>
 </html>
