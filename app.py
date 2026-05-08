@@ -5,6 +5,7 @@ import voice_gen
 import image_gen
 import video_gen
 import ai_engine
+import visual_fetcher
 import asyncio
 import os
 import uuid
@@ -18,37 +19,48 @@ CORS(app)
 STATIC_VIDEO_DIR = "static/videos"
 ASSETS_AUDIO_DIR = "assets/audio"
 ASSETS_IMAGES_DIR = "assets/images"
+TEMP_MEDIA_DIR = "assets/temp_media"
 
 # Ensure directories exist
-for d in [STATIC_VIDEO_DIR, ASSETS_AUDIO_DIR, ASSETS_IMAGES_DIR]:
+for d in [STATIC_VIDEO_DIR, ASSETS_AUDIO_DIR, ASSETS_IMAGES_DIR, TEMP_MEDIA_DIR]:
     os.makedirs(d, exist_ok=True)
 
 # Global Job Management
-jobs_status = {} # { job_id: { "status": str, "headline": str, "video_url": str, "script": str, "progress": int } }
+jobs_status = {}
 
 def video_worker(job_id, headline, lang, niche):
     try:
-        jobs_status[job_id]["status"] = "Generating Script..."
-        jobs_status[job_id]["progress"] = 20
-        script = ai_engine.generate_ai_script(headline, niche, lang)
+        jobs_status[job_id]["status"] = "AI Scripting..."
+        jobs_status[job_id]["progress"] = 15
+        ai_res = ai_engine.generate_ai_script(headline, niche, lang)
+        script = ai_res["script"]
+        keywords = ai_res["keywords"]
         jobs_status[job_id]["script"] = script
 
         jobs_status[job_id]["status"] = "Generating Voice..."
-        jobs_status[job_id]["progress"] = 40
+        jobs_status[job_id]["progress"] = 30
         audio_path = os.path.join(ASSETS_AUDIO_DIR, f"{job_id}.mp3")
         voice_name = "hi-IN-MadhurNeural" if lang == 'hi' else "en-US-GuyNeural"
         asyncio.run(voice_gen.generate_voice(script, voice_name, audio_path))
 
-        jobs_status[job_id]["status"] = "Generating Image..."
+        jobs_status[job_id]["status"] = "Fetching Visuals..."
+        jobs_status[job_id]["progress"] = 50
+        media_paths = visual_fetcher.fetch_visuals(keywords, count=5)
+
+        # Always generate one headline image as fallback/intro
+        jobs_status[job_id]["status"] = "Generating Title Card..."
         jobs_status[job_id]["progress"] = 60
         image_path = os.path.join(ASSETS_IMAGES_DIR, f"{job_id}.png")
         image_gen.create_text_image(headline, image_path)
 
-        jobs_status[job_id]["status"] = "Assembling Video..."
+        # Combine media
+        media_to_use = [image_path] + media_paths
+
+        jobs_status[job_id]["status"] = "Assembling V3 Video..."
         jobs_status[job_id]["progress"] = 80
         video_filename = f"{job_id}.mp4"
         video_path = os.path.join(STATIC_VIDEO_DIR, video_filename)
-        video_gen.assemble_video(image_path, audio_path, video_path)
+        video_gen.assemble_video(media_to_use, audio_path, video_path, headline)
 
         jobs_status[job_id]["status"] = "Completed"
         jobs_status[job_id]["progress"] = 100
@@ -91,7 +103,6 @@ def generate():
             "created_at": time.time()
         }
 
-        # Start worker thread
         thread = threading.Thread(target=video_worker, args=(job_id, headline, lang, niche))
         thread.start()
 
@@ -99,7 +110,6 @@ def generate():
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
-    # Return all jobs created in the last 1 hour to keep it clean
     current_time = time.time()
     active_jobs = {jid: info for jid, info in jobs_status.items() if current_time - info.get("created_at", 0) < 3600}
     return jsonify(active_jobs)

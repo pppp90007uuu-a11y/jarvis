@@ -1,6 +1,7 @@
 import asyncio
 import google.generativeai as genai
 import os
+import re
 
 # Configure Gemini if API key is present
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -12,35 +13,59 @@ else:
 
 def generate_ai_script(headline, niche="Tech News", lang="hi"):
     """
-    Generates an engaging YouTube script using Gemini AI or a template fallback.
+    Generates a detailed script (30-80s) and search keywords.
     """
     prompt = f"""
-    Write a 3-sentence engaging YouTube Short script for a {niche} channel.
+    Create a detailed YouTube script for a {niche} channel.
     Topic: {headline}
     Language: {"Hindi (in Devanagari script)" if lang == 'hi' else "English"}
-    Structure:
-    1. A catchy hook line to grab attention.
-    2. A brief but informative body about the news.
-    3. An outro asking viewers to subscribe.
-    Include 3 relevant hashtags at the end.
+
+    Requirements:
+    1. Duration: Must be around 45-60 seconds when spoken (approx 120-150 words).
+    2. Structure: Catchy Hook, Detailed Explanation, Interesting Fact, and Call to Action.
+    3. Output Format:
+       SCRIPT: [The full script here]
+       KEYWORDS: [5-8 comma separated English keywords for stock video search related to this topic]
+       HASHTAGS: #tag1 #tag2 #tag3
     """
 
     if model:
         try:
             response = model.generate_content(prompt)
-            return response.text
+            return parse_ai_response(response.text, headline, niche, lang)
         except Exception as e:
             print(f"AI Generation failed: {e}")
             return fallback_script(headline, niche, lang)
     else:
         return fallback_script(headline, niche, lang)
 
+def parse_ai_response(text, headline, niche, lang):
+    script_match = re.search(r"SCRIPT:(.*?)(?=KEYWORDS:|$)", text, re.DOTALL | re.IGNORECASE)
+    keywords_match = re.search(r"KEYWORDS:(.*?)(?=HASHTAGS:|$)", text, re.DOTALL | re.IGNORECASE)
+    hashtags_match = re.search(r"HASHTAGS:(.*)", text, re.DOTALL | re.IGNORECASE)
+
+    script = script_match.group(1).strip() if script_match else text
+    keywords = keywords_match.group(1).strip() if keywords_match else "technology, innovation, future"
+    hashtags = hashtags_match.group(1).strip() if hashtags_match else "#tech #news"
+
+    return {
+        "script": f"{script}\n\n{hashtags}",
+        "keywords": [k.strip() for k in keywords.split(",")]
+    }
+
 def fallback_script(headline, niche, lang):
+    # Expanded fallback to ensure minimum length
     if lang == 'hi':
-        return f"नमस्ते दोस्तों! {niche} में आज की बड़ी खबर है: {headline}. यह तकनीक की दुनिया को पूरी तरह से बदल सकता है। ऐसे ही और शानदार अपडेट्स के लिए हमारे चैनल को अभी सब्सक्राइब करें! #TechNews #India #Tech"
+        script = f"नमस्ते दोस्तों! {niche} में आज एक बहुत बड़ी अपडेट आई है। खबर है कि {headline}। यह तकनीक की दुनिया में एक बड़ा बदलाव ला सकता है। जानकारों का मानना है कि इससे आने वाले समय में हमें काफी कुछ नया देखने को मिलेगा। क्या आप इसके लिए तैयार हैं? हमें कमेंट्स में बताएं और ऐसे ही और भी मजेदार और जानकारीपूर्ण वीडियोस के लिए हमारे चैनल को अभी सब्सक्राइब करना न भूलें! धन्यवाद।"
     else:
-        return f"Hey everyone! Today's big {niche} update is about: {headline}. This could be a game-changer for the industry. For more such exciting updates, make sure to subscribe! #Tech #Innovation #Update"
+        script = f"Hey everyone! We have a major update in the world of {niche}. Today we are talking about {headline}. This development is expected to revolutionize how we interact with technology in our daily lives. Industry experts are already calling it a game-changer. What are your thoughts on this? Let us know in the comments below! Don't forget to hit that subscribe button for more deep dives into the latest tech. See you in the next one!"
+
+    return {
+        "script": script + "\n\n#tech #news #innovation",
+        "keywords": ["technology", "innovation", "future", "news", "digital"]
+    }
 
 if __name__ == "__main__":
-    # Quick test
-    print(generate_ai_script("AI model is now free for everyone", "Tech News", "hi"))
+    res = generate_ai_script("SpaceX Starship Launch", "Science", "en")
+    print(f"Script Length: {len(res['script'].split())} words")
+    print(f"Keywords: {res['keywords']}")
