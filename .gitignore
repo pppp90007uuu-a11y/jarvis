@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*$py.class
+assets/audio/*.mp3
+assets/images/*.png
+static/videos/*.mp4
+*.log
+.DS_Store
