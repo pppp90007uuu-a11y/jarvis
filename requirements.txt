@@ -1,0 +1,8 @@
+flask
+flask-cors
+moviepy>=2.0.0
+edge-tts
+requests
+googlesearch-python
+Pillow
+google-generativeai
